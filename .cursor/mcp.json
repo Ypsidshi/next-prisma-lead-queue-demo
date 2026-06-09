@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "leads-postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/leads?schema=public"
+      ]
+    }
+  }
+}

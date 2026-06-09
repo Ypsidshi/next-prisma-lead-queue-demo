@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LeadProcessingStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+}
+
+model Lead {
+  id                 String               @id @default(cuid())
+  name               String
+  email              String
+  message            String               @default("")
+  /// Необязательный ключ идемпотентности с клиента; уникален в БД
+  idempotencyKey     String?              @unique
+  processingStatus   LeadProcessingStatus @default(PENDING)
+  attemptCount       Int                  @default(0)
+  lastError          String?
+  lockedAt           DateTime?
+  processedAt        DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  @@index([processingStatus, createdAt])
+}
