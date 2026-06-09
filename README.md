@@ -2,11 +2,18 @@
 
 Демо для портфолио: **публичная форма лида → PostgreSQL → фоновая обработка** отдельным процессом на **TypeScript** (воркер в Docker Compose). Стек: **Next.js 16 (App Router)**, **TypeScript strict**, **Prisma**, **PostgreSQL**. Отдельный REST/NestJS-сервис не используется: граница — **Server Actions** + прямой доступ воркера к БД через Prisma.
 
+## Порты (локально)
+
+| Сервис | Порт |
+|--------|------|
+| PostgreSQL (Docker) | **5435** |
+| Веб (Docker / `PORT=3001`) | **3001** |
+
 ## Сквозной сценарий (заказчик)
 
 1. Скопируйте `.env.example` в `.env` и при необходимости поправьте `DATABASE_URL`.
 2. Поднимите БД и приложение: `docker compose up --build` (первый запуск применит миграции и соберёт образы).
-3. Откройте в браузере `http://localhost:3000`, заполните форму «Оставить заявку» и отправьте.
+3. Откройте в браузере `http://localhost:3001`, заполните форму «Оставить заявку» и отправьте.
 4. В таблице `Lead` появится запись со статусом `PENDING`; сервис **worker** заберёт её, переведёт в `PROCESSING`, затем в `SUCCEEDED` (поле `processedAt`) или оставит в очереди с ретраями / переведёт в `FAILED` после исчерпания попыток.
 5. Повторная отправка с тем же скрытым ключом идемпотентности (UUID в поле `idempotencyKey`) не создаёт дубликат — пользователь видит сообщение о повторной отправке.
 
@@ -15,7 +22,7 @@
 ## Локально без Docker (опционально)
 
 1. PostgreSQL 16+ с базой `leads` и пользователем из `DATABASE_URL`.
-2. `cp .env.example .env` → `npx prisma migrate dev` → `npm install` → `npm run dev` (веб на `http://localhost:3000`).
+2. `cp .env.example .env` → `npx prisma migrate dev` → `npm install` → `PORT=3001 npm run dev` (веб на `http://localhost:3001`; Postgres на `localhost:5435`).
 3. В отдельном терминале: `npm run worker` (те же переменные `DATABASE_URL` и при желании `WORKER_*`).
 
 ## Переменные окружения
